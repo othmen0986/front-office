@@ -1,0 +1,632 @@
+<div class="microcredit-application-page">
+  <!-- Service Banner with Background Image -->
+  <div class="service-banner" style="background-image: ('https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg');">
+    <div class="banner-overlay"></div>
+    <div class="banner-content">
+      <h1>Microcredit Application</h1>
+      <p>Finance your dreams with our flexible microcredit solutions</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="application-layout">
+      <!-- Main Application Form -->
+      <div class="application-card" [@fadeInUp]>
+        <div class="application-header">
+          <h4>
+            <i class="fas fa-hand-holding-usd"></i> New Microcredit Application
+          </h4>
+        </div>
+
+        <div class="application-body">
+          <form #microcreditForm="ngForm" (ngSubmit)="onSubmitApplicationData(microcreditForm)">
+            <!-- [Previous form content remains exactly the same] -->
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Age</label>
+                <input type="number" class="form-input" name="personAge" [(ngModel)]="currentApplication.personAge" required min="18" max="100">
+              </div>
+              
+              <div class="form-group">
+                <label>Income ($)</label>
+                <input type="number" class="form-input" name="personIncome" [(ngModel)]="currentApplication.personIncome" required min="0">
+              </div>
+              
+              <div class="form-group">
+                <label>Home Ownership</label>
+                <select class="form-input" name="personHomeOwnership" [(ngModel)]="currentApplication.personHomeOwnership" required>
+                  <option [ngValue]="null" disabled>Select...</option>
+                  <option *ngFor="let option of homeOwnershipOptions" [ngValue]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>Employment Length (Years)</label>
+                <input type="number" class="form-input" name="personEmpLength" [(ngModel)]="currentApplication.personEmpLength" required min="0" max="50">
+              </div>
+              
+              <div class="form-group">
+                <label>Loan Intent</label>
+                <select class="form-input" name="loanIntent" [(ngModel)]="currentApplication.loanIntent" required>
+                  <option [ngValue]="null" disabled>Select...</option>
+                  <option *ngFor="let option of loanIntentOptions" [ngValue]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>Loan Grade</label>
+                <select class="form-input" name="loanGrade" [(ngModel)]="currentApplication.loanGrade" required>
+                  <option [ngValue]="null" disabled>Select...</option>
+                  <option *ngFor="let option of loanGradeOptions" [ngValue]="option.value">{{ option.label }}</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>Loan Amount ($)</label>
+                <input type="number" class="form-input" name="loanAmnt" [(ngModel)]="currentApplication.loanAmnt" required min="1000" step="100">
+              </div>
+              
+              <div class="form-group">
+                <label>Interest Rate (%)</label>
+                <input type="number" class="form-input" name="loanIntRate" [(ngModel)]="currentApplication.loanIntRate" required min="0" max="30" step="0.01">
+              </div>
+              
+              <div class="form-group">
+                <label>Debt-to-Income Ratio</label>
+                <input type="number" class="form-input" name="dti" [(ngModel)]="currentApplication.dti" required min="0" max="1" step="0.01">
+              </div>
+              
+              <div class="form-group">
+                <label>Credit Score</label>
+                <input type="number" class="form-input" name="creditScore" [(ngModel)]="currentApplication.creditScore" required min="300" max="850">
+              </div>
+              
+              <div class="form-group">
+                <label>Loan Term (Months)</label>
+                <input type="number" class="form-input" name="loanTermMonths" [(ngModel)]="currentApplication.loanTermMonths" required min="6" max="120">
+              </div>
+              
+              <div class="form-group full-width">
+                <label>Upload Supporting Document (e.g., ID, Proof of Income)</label>
+                <div class="file-upload-wrapper">
+                  <input type="file" class="file-input" id="applicationDocumentFile"
+                       (change)="onFileSelected($event)"
+                       #documentFileInput
+                       accept="image/*, application/pdf" required>
+                  <label for="applicationDocumentFile" class="file-upload-label">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose File
+                  </label>
+                  <small *ngIf="selectedFile" class="file-info">
+                    Selected: {{ selectedFile.name }} ({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)
+                  </small>
+                </div>
+              </div>
+            <div class="form-actions">
+                <button class="submit-btn" type="submit" [disabled]="microcreditForm.invalid || !selectedFile || isSubmittingData">
+                  <span *ngIf="isSubmittingData" class="spinner"></span>
+                  Submit Application
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div *ngIf="submissionError" class="alert error" [@fadeInUp]>
+            <strong>Error:</strong> {{ submissionError }}
+          </div>
+          
+          <div *ngIf="submissionSuccess" class="alert success" [@fadeInUp]>
+            <strong>Success!</strong> Your application has been submitted.
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommended Services Sidebar -->
+      <div class="services-sidebar" [@fadeInRight]>
+        <div class="info-card">
+          <h3>Why Choose Us?</h3>
+          <ul class="benefits-list">
+            <li>
+              <strong>Competitive Rates</strong>
+              <p>Lower interest rates than traditional banks</p>
+            </li>
+            <li>
+              <strong>Quick Approval</strong>
+              <p>Get a decision within 24 hours</p>
+            </li>
+            <li>
+              <strong>Flexible Terms</strong>
+              <p>Repayment plans tailored to your needs</p>
+            </li>
+            <li>
+              <strong>No Hidden Fees</strong>
+              <p>Transparent pricing with no surprises</p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3>Related Services</h3>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-car"></i>
+            </div>
+            <div class="service-info">
+              <h4>Vehicle Showroom</h4>
+              <p>Special Cars Collection</p>
+              <a href="#" class="service-link">Learn more</a>
+            </div>
+          </div>
+          
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <div class="service-info">
+              <h4>Secure Paiement</h4>
+              <p>Paiement withe your bank cards or flucci account</p>
+              <a href="#" class="service-link">Learn more</a>
+            </div>
+          </div>
+          
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="service-info">
+              <h4>Microassurance Automobile</h4>
+              <p>Optimal protection for your vehicle </p>
+              <a href="#" class="service-link">Learn more</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card cta-card">
+          <h3>Need Help?</h3>
+          <p>Our financial advisors are available to guide you through the application process.</p>
+          <a href="#" class="primary-btn">
+            <i class="fas fa-phone-alt"></i> Contact Support
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style lang="scss">
+  /* SCSS Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Main Styles */
+  .microcredit-application-page {
+    color: #e0e0e0;
+    background: linear-gradient(135deg, #121a2b 0%, #0d121f 100%);
+    min-height: 100vh;
+  }
+  
+  .service-banner {
+    position: relative;
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    margin-bottom: 60px;
+  
+    .banner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+    }
+  
+    .banner-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      padding: 0 20px;
+  
+      h1 {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #ffffff;
+      }
+  
+      p {
+        font-size: 20px;
+        opacity: 0.9;
+      }
+    }
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .application-layout {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 60px;
+  
+    @media (max-width: 992px) {
+      flex-direction: column;
+    }
+  }
+  
+  .application-card {
+    flex: 2;
+    background: rgba(26, 43, 71, 0.8);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(77, 161, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .application-header {
+    padding: 20px 25px;
+    background: rgba(77, 161, 255, 0.1);
+    border-bottom: 1px solid rgba(77, 161, 255, 0.2);
+    
+    h4 {
+      margin: 0;
+      color: #4da1ff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      
+      i {
+        margin-right: 10px;
+        font-size: 20px;
+      }
+    }
+  }
+  
+  .application-body {
+    padding: 25px;
+  }
+  
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #a0b3d1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(18, 26, 43, 0.7);
+    border: 1px solid rgba(77, 161, 255, 0.2);
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: #4da1ff;
+      box-shadow: 0 0 0 2px rgba(77, 161, 255, 0.2);
+    }
+    
+    &::placeholder {
+      color: #5a6a85;
+    }
+  }
+  
+  select.form-input {
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 15px;
+  padding-right: 35px;
+}
+
+  
+  .file-upload-wrapper {
+    position: relative;
+    margin-top: 5px;
+  }
+  
+  .file-input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+  }
+  
+  .file-upload-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(77, 161, 255, 0.1);
+    border: 1px dashed rgba(77, 161, 255, 0.4);
+    border-radius: 6px;
+    color: #4da1ff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(77, 161, 255, 0.2);
+    }
+    
+    i {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+  }
+  
+  .file-info {
+    display: block;
+    margin-top: 8px;
+    color: #7d8fb3;
+    font-size: 13px;
+  }
+  
+  .form-actions {
+    grid-column: 1 / -1;
+    margin-top: 20px;
+    text-align: right;
+  }
+  
+  .submit-btn {
+    background: linear-gradient(45deg, #3d84ff, #4da1ff);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(77, 161, 255, 0.2);
+    position: relative;
+    
+    &:hover:not([disabled]) {
+      background: linear-gradient(45deg, #4da1ff, #3d84ff);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(77, 161, 255, 0.3);
+    }
+    
+    &:active:not([disabled]) {
+      transform: translateY(0);
+    }
+    
+    &[disabled] {
+      background: #3a4559;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+  
+  .spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 20px;
+    font-size: 14px;
+    
+    &.error {
+      background: rgba(255, 71, 87, 0.1);
+      border: 1px solid rgba(255, 71, 87, 0.3);
+      color: #ff4757;
+    }
+    
+    &.success {
+      background: rgba(46, 213, 115, 0.1);
+      border: 1px solid rgba(46, 213, 115, 0.3);
+      color: #2ed573;
+    }
+  }
+  
+  /* Services Sidebar Styles */
+  .services-sidebar {
+    flex: 1;
+    min-width: 300px;
+  
+    @media (max-width: 992px) {
+      min-width: 100%;
+    }
+  }
+  
+  .info-card {
+    background: rgba(26, 43, 71, 0.7);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  
+    h3 {
+      color: #ffffff;
+      font-size: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+  }
+  
+  .benefits-list {
+    list-style: none;
+    padding: 0;
+  
+    li {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  
+      &:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+  
+      strong {
+        display: block;
+        color: #4da1ff;
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+  
+      p {
+        font-size: 14px;
+        line-height: 1.6;
+        opacity: 0.9;
+      }
+    }
+  }
+  
+  .service-card {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  
+    &:last-child {
+      border-bottom: none;
+    }
+  
+    .service-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(45deg, #3d84ff, #4da1ff);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      flex-shrink: 0;
+  
+      i {
+        font-size: 20px;
+        color: white;
+      }
+    }
+  
+    .service-info {
+      h4 {
+        color: #ffffff;
+        margin-bottom: 5px;
+        font-size: 16px;
+      }
+  
+      p {
+        font-size: 13px;
+        opacity: 0.8;
+        margin-bottom: 8px;
+      }
+  
+      .service-link {
+        color: #4da1ff;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+  
+        &:hover {
+          text-decoration: underline;
+        }
+  
+        i {
+          margin-left: 5px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+  
+  .cta-card {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(26, 43, 71, 0.9), rgba(18, 26, 43, 0.9));
+  
+    p {
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+  }
+  
+  .primary-btn {
+    background: linear-gradient(45deg, #3d84ff, #4da1ff);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(77, 161, 255, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    i {
+      margin-right: 8px;
+    }
+  
+    &:hover {
+      background: linear-gradient(45deg, #4da1ff, #3d84ff);
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(77, 161, 255, 0.3);
+    }
+  }
+  </style>
