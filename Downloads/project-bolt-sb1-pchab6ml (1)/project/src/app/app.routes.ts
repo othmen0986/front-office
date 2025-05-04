@@ -10,16 +10,6 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/services/credit/credit.component').then(m => m.CreditComponent)
   },
   {
-    path: 'services/credit-payment',
-    loadComponent: () => import('./pages/services/credit-payment/credit-payment.component')
-      .then(m => m.CreditPaymentComponent)
-  },
-  {
-    path: 'services/credit-payment/:id',
-    loadComponent: () => import('./pages/services/credit-payment/credit-payment.component')
-      .then(m => m.CreditPaymentComponent)
-  },
-  {
     path: 'services/payment',
     loadComponent: () => import('./pages/services/payment/payment.component').then(m => m.PaymentComponent)
   },
@@ -32,10 +22,16 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/services/vehicles/vehicles.component').then(m => m.VehiclesComponent)
   },
   {
-    path: 'services/vehicles/:id',    
+    path: 'services/leaflet-map',
+    loadComponent: () => import('./pages/services/leaflet-map/leaflet-map.component')
+      .then(m => m.LeafletMapComponent)
+  },
+  {
+    path: 'services/vehicles/:id',
     loadComponent: () => import('./pages/services/vehicles/vehicle-details/vehicle-details.component')
       .then(m => m.VehicleDetailsComponent)
   },
+  
   {
     path: 'contact',
     loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent)

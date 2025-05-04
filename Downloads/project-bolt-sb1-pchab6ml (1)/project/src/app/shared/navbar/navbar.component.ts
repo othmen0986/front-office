@@ -24,7 +24,6 @@ import { fadeAnimation } from '../../core/animations/fade.animation';
             <a (click)="toggleDropdown()" class="dropdown-toggle">Services</a>
             <ul class="dropdown-menu" [class.show]="dropdownOpen">
               <li><a routerLink="/services/credit" routerLinkActive="active" (click)="closeMenu()">Crédit</a></li>
-              <li><a routerLink="/services/credit-payment" routerLinkActive="active" (click)="closeMenu()">Paiements Crédit</a></li>
               <li><a routerLink="/services/payment" routerLinkActive="active" (click)="closeMenu()">Paiement</a></li>
               <li><a routerLink="/services/insurance" routerLinkActive="active" (click)="closeMenu()">Microassurance</a></li>
               <li><a routerLink="/services/parts" routerLinkActive="active" (click)="closeMenu()">Pièces Détachées</a></li>
