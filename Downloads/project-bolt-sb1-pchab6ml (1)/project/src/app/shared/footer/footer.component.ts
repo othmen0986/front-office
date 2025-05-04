@@ -19,6 +19,7 @@ import { RouterLink } from '@angular/router';
             <h4>Services</h4>
             <ul>
               <li><a routerLink="/services/credit">Crédit</a></li>
+              <li><a routerLink="/services/credit-payment">Paiements Crédit</a></li>
               <li><a routerLink="/services/payment">Paiement</a></li>
               <li><a routerLink="/services/insurance">Microassurance</a></li>
               <li><a routerLink="/services/parts">Pièces Détachées</a></li>

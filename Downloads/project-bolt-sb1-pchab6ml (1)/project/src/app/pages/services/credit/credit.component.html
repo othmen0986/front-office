@@ -20,7 +20,6 @@
 
         <div class="application-body">
           <form #microcreditForm="ngForm" (ngSubmit)="onSubmitApplicationData(microcreditForm)">
-            <!-- [Previous form content remains exactly the same] -->
             <div class="form-grid">
               <div class="form-group">
                 <label>Age</label>
@@ -101,12 +100,19 @@
                   </small>
                 </div>
               </div>
-            <div class="form-actions">
-                <button class="submit-btn" type="submit" [disabled]="microcreditForm.invalid || !selectedFile || isSubmittingData">
-                  <span *ngIf="isSubmittingData" class="spinner"></span>
-                  Submit Application
+
+              <div class="form-group full-width">
+                <button type="button" class="btn btn-primary" (click)="viewPayments()">
+                  <i class="fas fa-credit-card"></i> Voir les Paiements
                 </button>
               </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="submit-btn" type="submit" [disabled]="microcreditForm.invalid || !selectedFile || isSubmittingData">
+                <span *ngIf="isSubmittingData" class="spinner"></span>
+                Submit Application
+              </button>
             </div>
           </form>
 

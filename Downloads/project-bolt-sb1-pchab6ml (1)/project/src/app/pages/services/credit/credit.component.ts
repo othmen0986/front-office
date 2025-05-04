@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { NgForm, FormsModule } from '@angular/forms'; // <-- Import FormsModule here
+import { Router } from '@angular/router';
 
 // Assuming MicrocreditService has been updated or a new method added
 // to handle application submission with a document upload (e.g., using FormData)
@@ -156,8 +157,8 @@ export class CreditComponent implements OnInit {
 
   // Removed NgbModal from constructor
   constructor(
-    private microcreditService: CreditService // <-- Corrected service name in constructor
-    // private modalService: NgbModal,
+    private microcreditService: CreditService, // <-- Corrected service name in constructor
+    private router: Router
   ) {}
 
   // Simplified ngOnInit - no initial data load needed for the form
@@ -393,6 +394,13 @@ export class CreditComponent implements OnInit {
 
   // Removed checkApproval method
 
+  viewPayments(): void {
+    if (this.currentApplication?.id) {
+      this.router.navigate(['/services/credit-payment'], {
+        queryParams: { creditId: this.currentApplication.id }
+      });
+    }
+  }
 }
 // Removed the separate 'trigger' function definition outside the class
 // as 'trigger' from '@angular/animations' should be used directly or aliased
