@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import * as L from 'leaflet';
 import { Vehicle } from '../../../../core/models/vehicle.model';
-import { VehicleService } from '../../../../core/services/vehicle.service';
+import { VehiculeService } from '../vehicule.service'; // Updated import path
 import { fadeInUpAnimation, fadeInLeftAnimation, fadeInRightAnimation } from '../../../../core/animations/fade.animation';
 
 @Component({
@@ -29,22 +30,20 @@ import { fadeInUpAnimation, fadeInLeftAnimation, fadeInRightAnimation } from '..
           <div class="main-content" @fadeInLeft>
             <div class="image-gallery">
               <div class="main-image">
-                <img [src]="vehicle.images[currentImageIndex]" [alt]="vehicle.brand + ' ' + vehicle.model">
+                <img [src]="vehicle.image" [alt]="vehicle.brand + ' ' + vehicle.model">
               </div>
-              <div class="thumbnail-list">
-                <button 
-                  *ngFor="let image of vehicle.images; let i = index"
-                  class="thumbnail"
-                  [class.active]="i === currentImageIndex"
-                  (click)="setCurrentImage(i)">
-                  <img [src]="image" [alt]="vehicle.brand + ' ' + vehicle.model">
-                </button>
-              </div>
+              
             </div>
 
             <div class="vehicle-description">
               <h2>Description</h2>
               <p>{{ vehicle.description }}</p>
+            </div>
+
+            <!-- Separate map section -->
+            <div class="map-container">
+              <h2>Localisation</h2>
+              <div id="map" style="height: 500px; width: 100%;"></div>
             </div>
 
             <div class="vehicle-features">
@@ -76,8 +75,12 @@ import { fadeInUpAnimation, fadeInLeftAnimation, fadeInRightAnimation } from '..
                   <span class="spec-value">{{ vehicle.specifications.mileage }} km</span>
                 </div>
                 <div class="spec-item">
-                  <span class="spec-label">Moteur</span>
-                  <span class="spec-value">{{ vehicle.specifications.engine }}</span>
+                  <span class="spec-label">Color</span>
+                  <span class="spec-value">{{ vehicle.color }}</span>
+                </div>
+                 <div class="spec-item">
+                  <span class="spec-label">Serie</span>
+                  <span class="spec-value">{{ vehicle.numeroSerie }}</span>
                 </div>
               </div>
             </div>
@@ -234,6 +237,17 @@ import { fadeInUpAnimation, fadeInLeftAnimation, fadeInRightAnimation } from '..
       padding: 25px;
       margin-bottom: 30px;
       border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .map-container {
+      margin-top: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
     }
 
     h2 {
@@ -429,19 +443,98 @@ import { fadeInUpAnimation, fadeInLeftAnimation, fadeInRightAnimation } from '..
   `],
   animations: [fadeInUpAnimation, fadeInLeftAnimation, fadeInRightAnimation]
 })
-export class VehicleDetailsComponent implements OnInit {
+export class VehicleDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
+  private map!: any;
+  private marker!: any;
+
   vehicle: Vehicle | undefined;
   currentImageIndex = 0;
+  DEFAULT_IMAGE = 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg';
+  //private map!: L.Map;
+  //private marker!: L.Marker;
 
   constructor(
     private route: ActivatedRoute,
-    private vehicleService: VehicleService
+    private vehiculeService: VehiculeService
   ) {}
 
   ngOnInit() {
     const vehicleId = this.route.snapshot.paramMap.get('id');
     if (vehicleId) {
-      this.vehicle = this.vehicleService.getVehicleById(vehicleId);
+      this.vehiculeService.getVehicleById(vehicleId).subscribe({
+        next: (vehicule) => {
+          this.vehicle = {
+            id: vehicule.id?.toString() || '',
+            brand: vehicule.marque,
+            model: vehicule.modele,
+            year: vehicule.anneeFabrication || 0,
+            price: vehicule.prix || 0,
+            color: vehicule.couleur || '', // Ensure color is populated
+            numeroSerie: vehicule.numeroSerie || '', // Ensure numeroSerie is populated
+            fcrEligible: false,
+            image: vehicule.image || this.DEFAULT_IMAGE,
+            specifications: {
+              fuelType: vehicule.typeCarburant,
+              transmission: 'Auto',  // Default value
+              mileage: vehicule.kilometrage || 0,
+              engine: ''  // Default value
+            },
+            description: vehicule.caracteristiquesSupplémentaires || '', // Ensure the description is populated
+            features: [],
+            latitude: vehicule.latitude || 0,
+            longitude: vehicule.longitude || 0
+          };
+
+          // Initialize map after getting vehicle data
+          setTimeout(() => this.initMap(), 100);
+        },
+        error: (err: any) => {
+          console.error('Erreur chargement véhicule:', err);
+        }
+      });
+    }
+  }
+
+  ngAfterViewInit() {
+    // Wait for view to be ready before initializing map
+    setTimeout(() => {
+      if (this.vehicle?.latitude && this.vehicle?.longitude) {
+       // this.initMap();
+      }
+    }, 100);
+  }
+  private initMap(): void {
+    if (!this.vehicle?.latitude || !this.vehicle?.longitude) {
+      console.error('Vehicle coordinates are missing');
+      return;
+    }
+
+    // Initialize the map
+    this.map = L.map('map').setView([this.vehicle.latitude, this.vehicle.longitude], 13);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.map);
+
+    // Add a marker for the vehicle's location
+    this.marker = L.marker([this.vehicle.latitude, this.vehicle.longitude]).addTo(this.map);
+
+    // Add a popup to the marker
+    this.marker.bindPopup(`
+      <strong>${this.vehicle.brand} ${this.vehicle.model}</strong><br>
+      ${this.vehicle.specifications.fuelType}<br>
+      ${this.vehicle.year}
+    `).openPopup();
+
+    // Adjust the map view to fit the marker
+    this.map.fitBounds(L.latLngBounds([this.marker.getLatLng()]));
+    }
+  ngOnDestroy() {
+    // Clean up the map when the component is destroyed
+    if (this.map) {
+      this.map.remove();
     }
   }
 

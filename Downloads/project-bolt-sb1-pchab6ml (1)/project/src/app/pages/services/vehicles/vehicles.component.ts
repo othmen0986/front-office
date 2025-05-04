@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ServiceBannerComponent } from '../../../shared/service-banner/service-banner.component';
 import { RelatedServicesComponent } from '../../../shared/related-services/related-services.component';
-import { VehicleService } from '../../../core/services/vehicle.service';
+import { VehiculeService } from './vehicule.service';
 import { Vehicle, VehicleFilters } from '../../../core/models/vehicle.model';
 import { fadeInUpAnimation, fadeInLeftAnimation } from '../../../core/animations/fade.animation';
 
@@ -96,7 +96,7 @@ import { fadeInUpAnimation, fadeInLeftAnimation } from '../../../core/animations
           <main class="vehicles-grid" @fadeInUp>
             <div class="vehicle-card" *ngFor="let vehicle of filteredVehicles">
               <div class="vehicle-image">
-                <img [src]="vehicle.images[0]" [alt]="vehicle.brand + ' ' + vehicle.model">
+                <img [src]="vehicle.image" [alt]="vehicle.brand + ' ' + vehicle.model">
                 <span class="fcr-badge" *ngIf="vehicle.fcrEligible">FCR</span>
               </div>
               <div class="vehicle-info">
@@ -113,6 +113,9 @@ import { fadeInUpAnimation, fadeInLeftAnimation } from '../../../core/animations
                   </a>
                   <button class="secondary-btn" *ngIf="vehicle.fcrEligible">
                     Demander FCR
+                  </button>
+                  <button class="secondary-btn" (click)="sendReportRequest(+vehicle.id)">
+                    Envoyer un rapport
                   </button>
                 </div>
               </div>
@@ -325,6 +328,7 @@ import { fadeInUpAnimation, fadeInLeftAnimation } from '../../../core/animations
   animations: [fadeInUpAnimation, fadeInLeftAnimation]
 })
 export class VehiclesComponent implements OnInit {
+
   filteredVehicles: Vehicle[] = [];
   filters: VehicleFilters = {
     priceRange: { min: 0, max: 500000 },
@@ -338,16 +342,55 @@ export class VehiclesComponent implements OnInit {
   availableYears = [2024, 2023, 2022];
   availableFuelTypes = ['Electric', 'Hybrid', 'Essence'];
 
-  constructor(private vehicleService: VehicleService) {}
+  DEFAULT_IMAGE = 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg';
+
+  constructor(private vehiculeService: VehiculeService) {}
 
   ngOnInit() {
-    this.vehicleService.getFilteredVehicles().subscribe(vehicles => {
-      this.filteredVehicles = vehicles;
+    this.loadVehicles();
+  }
+
+  loadVehicles() {
+    this.vehiculeService.getVehicles().subscribe({
+      next: (vehicules) => {
+        this.filteredVehicles = vehicules.map(v => ({
+          id: v.id?.toString() || '',
+          brand: v.marque,
+          model: v.modele,
+          image: v.image ? `http://localhost:8083/api/vehicules/images/${v.image}` : this.DEFAULT_IMAGE,
+          numeroSerie: v.numeroSerie,
+          year: v.anneeFabrication || 0,
+          price: v.prix || 0,
+          fcrEligible: false,
+          specifications: {
+            fuelType: v.typeCarburant,
+            transmission: 'Auto',
+            mileage: v.kilometrage || 0,
+            engine: ''
+          },
+          description: v.caracteristiquesSupplémentaires,
+          features: []
+        }));
+        this.applyFilters();
+      },
+      error: (err: any) => console.error('Error loading vehicles:', err)
+    });
+  }
+
+  applyFilters() {
+    this.filteredVehicles = this.filteredVehicles.filter(vehicle => {
+      const matchesPrice = vehicle.price <= this.filters.priceRange.max;
+      const matchesBrand = this.filters.brands.length === 0 || this.filters.brands.includes(vehicle.brand);
+      const matchesYear = this.filters.years.length === 0 || this.filters.years.includes(vehicle.year);
+      const matchesFuelType = this.filters.fuelTypes.length === 0 || this.filters.fuelTypes.includes(vehicle.specifications.fuelType);
+      const matchesFcr = !this.filters.fcrEligibleOnly || vehicle.fcrEligible;
+
+      return matchesPrice && matchesBrand && matchesYear && matchesFuelType && matchesFcr;
     });
   }
 
   updateFilters() {
-    this.vehicleService.updateFilters(this.filters);
+    this.applyFilters();
   }
 
   toggleBrand(brand: string) {
@@ -378,5 +421,12 @@ export class VehiclesComponent implements OnInit {
       this.filters.fuelTypes.splice(index, 1);
     }
     this.updateFilters();
+  }
+
+  sendReportRequest(vehicleId: number) {
+    this.vehiculeService.sendReportRequest(vehicleId).subscribe({
+      next: () => alert('Report request email sent successfully!'),
+      error: (err) => console.error('Error sending report request email:', err)
+    });
   }
 }

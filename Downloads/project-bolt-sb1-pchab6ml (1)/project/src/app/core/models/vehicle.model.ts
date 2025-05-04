@@ -1,11 +1,11 @@
 export interface Vehicle {
-  id: string;
+  id: string;  // Keep as string to match backend
   brand: string;
   model: string;
   year: number;
   price: number;
   fcrEligible: boolean;
-  images: string[];
+  image: string;
   specifications: {
     fuelType: string;
     transmission: string;
@@ -14,6 +14,10 @@ export interface Vehicle {
   };
   description: string;
   features: string[];
+  numeroSerie: string;
+  latitude?: number;
+  color?: string;
+  longitude?: number;
 }
 
 export interface VehicleFilters {
